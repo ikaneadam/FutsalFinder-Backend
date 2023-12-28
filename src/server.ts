@@ -1,23 +1,20 @@
-import BackendApp from "./backendApp";
-import cors from "cors";
-import express from "express";
+import BackendApp from './backendApp';
+import cors from 'cors';
+import express from 'express';
 
-import dotenv from "dotenv";
+import dotenv from 'dotenv';
 
-import ExampleController from "./controllers/ExampleController";
+import UserView from '@views/UserView';
+import HostView from '@views/HostView';
+import AddressView from '@views/AddressView';
+import RoomView from '@views/RoomView';
 
 dotenv.config();
 
 const server = new BackendApp({
     port: Number(process.env.PORT) || 65036,
-    middleWares: [
-        cors(),
-        express.json(),
-        express.urlencoded({ extended: true })
-    ],
-    controllers: [
-        new ExampleController(),
-    ]
-})
+    middleWares: [cors(), express.json(), express.urlencoded({ extended: true })],
+    views: [new UserView(), new HostView(), new AddressView(), new RoomView()],
+});
 
-server.listen()
+server.listen();
