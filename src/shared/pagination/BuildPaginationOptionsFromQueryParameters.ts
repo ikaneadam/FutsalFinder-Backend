@@ -1,6 +1,7 @@
 import { Request } from 'express';
 import { PaginationOptions } from './pagination.options';
-import { getCurrentURLAndParamaters } from '../../../../../concept7/connections-api/src/shared/utils/getCurrentURLAndParamaters';
+import {getCurrentURLAndParamaters} from "@shared/utils/getCurrentURLAndParamaters";
+
 
 class BuildPaginationOptionsFromQueryParameters {
     private static defaultPage = 0;

@@ -12,9 +12,10 @@ import errorMessages from '@shared/errorMessages';
 dotenv.config();
 class GeoService {
     private readonly httpService: HttpService;
-    private readonly geoCodingServiceURL = `${process.env.POSITION_STACK_API_URL}`;
-    private readonly geoCodingApiKey = `${process.env.POSITION_STACK_API_KEY}`;
-    private readonly geoForwardURL = `${this.geoCodingServiceURL}/v1/forward`;
+    private readonly geoCodingServiceURL = `${process.env.GOOGLE_GEO_API_URL}`;
+    private readonly geoCodingApiKey = `${process.env.GOOLE_GEO_API_KEY}`;
+    private readonly geoForwardURL = `${this.geoCodingServiceURL}/maps/api/geocode/json`;
+
 
     constructor() {
         this.httpService = new HttpService();
@@ -23,10 +24,9 @@ class GeoService {
     public async getAddressFromGeoForward(
         geoForwardInput: GeoForwardInput
     ): Promise<GeoForwardSuccessResponse> {
-        const geoForwardInputQueryParameters =
-            this.parseGeoForwardInputToQueryParam(geoForwardInput);
         //access key should be done else where but no time
-        const geoForwardRequestURL = `${this.geoForwardURL}?${geoForwardInputQueryParameters}&access_key=${this.geoCodingApiKey}`;
+        const geoForwardRequestURL = this.createGeoForwardRequestURl(geoForwardInput)
+
         const geoLocationResponse = await this.httpService.doRequest<
             GeoForwardSuccessResponse,
             GeoForwardErrorResponse
@@ -38,16 +38,22 @@ class GeoService {
         throw new InternalServerError(errorMessages.common.notAvailable);
     }
 
+    private createGeoForwardRequestURl(geoInput: GeoForwardInput): string {
+        const geoAddressQuery= this.parseGeoForwardInputToQueryParam(geoInput)
+
+        const componentFilterQueryString = `country:NL|postal_code=${geoInput.zip}`
+        //&components=${componentFilterQueryString}
+        const geoForwardRequestFullUrl = `${this.geoForwardURL}?address=${geoAddressQuery}&key=${this.geoCodingApiKey}`;
+
+        return geoForwardRequestFullUrl;
+    }
+
     private parseGeoForwardInputToQueryParam(geoInput: GeoForwardInput): string {
         const { street, houseNumber, zip, state, city } = geoInput;
 
-        const encodedQueryString = encodeURIComponent(
+        const queryString = encodeURIComponent(
             `${street},${houseNumber},${zip},${state},${city}`
         );
-
-        const queryString = `query=${encodedQueryString}&country=NL&region=${encodeURIComponent(
-            city
-        )}`;
 
         return queryString;
     }

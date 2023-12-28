@@ -12,7 +12,7 @@ class AddressController {
     //todo better address validation so we can minimise external api usage
     private getAddressSchema: Joi.Schema = Joi.object({
         street: Joi.string().min(2).max(40).required(),
-        houseNumber: Joi.string().min(2).max(40).required(),
+        houseNumber: Joi.string().min(1).max(40).required(),
         zip: Joi.string().min(2).max(40).required(),
         state: Joi.string().min(2).max(40).required(),
         city: Joi.string().min(2).max(40).required(),

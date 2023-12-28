@@ -6,3 +6,4 @@ tmp/
 temp/
 package-lock/
 .env
+data/

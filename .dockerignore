@@ -6,3 +6,4 @@ db
 compose.yaml
 Dockerfile
 README.md
+/fileStorage
