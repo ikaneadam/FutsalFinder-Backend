@@ -72,7 +72,10 @@ function handleUniqueFieldError(errorDetail: string | undefined, res: Response) 
     return res.status(HttpStatusCode.BadRequest).send({ error: message });
 }
 function handleInvalidUUIDErrorCode(res: Response) {
-    //todo stil debating on this one
+    //this is not only for uuid see example below
+    // so we must check if it says uuid and then only send 404 and for other things is 400 enough
+    //QueryFailedError: invalid input value for enum standard_available_date_dayofweek_enum: "Monday"
+    //todo see above
     return res.status(HttpStatusCode.NotFound).send();
 }
 

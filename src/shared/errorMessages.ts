@@ -13,6 +13,16 @@ const errorMessages = {
         notFound: 'host not found',
         noIdProvided: 'no host id provided',
     },
+    rooms: {
+        notFound: 'rooms not found',
+        noIdProvided: 'no room id provided',
+    },
+    dates: {
+        invalidTimeFormat: 'Invalid time format. Please use HH:00 or HH:30',
+        invalidDateFormat: 'Invalid start time format. Please use YYYY-MM-DD',
+        dateIsNotPossible: 'Given Date does not exist',
+        dateMustBeFuture: 'Date must be in the future',
+    },
 };
 
 // A LOT OF DUPLICATES STEP UP YOUR GAME SON

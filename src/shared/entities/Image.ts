@@ -8,5 +8,5 @@ export class Image {
     id: number;
 
     @Column({ type: 'varchar', length: 255 })
-    url: string;
+    fileName: string;
 }

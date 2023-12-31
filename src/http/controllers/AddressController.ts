@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import * as Joi from 'joi';
-import { validateSchema } from '@shared/utils/ValidateSchema';
+import { validateSchema } from '@shared/utils/rest/ValidateSchema';
 import { handleRestExceptions } from '@shared/HandleRestExceptions';
 import GeoService from '@shared/service/GeoService';
 

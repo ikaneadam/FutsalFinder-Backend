@@ -4,8 +4,8 @@ import RoomService from '@services/RoomService';
 import RoomDAO from '@shared/dao/RoomDAO';
 import { PaginationOptions } from '@shared/pagination/pagination.options';
 import BuildPaginationOptionsFromQueryParameters from '@shared/pagination/BuildPaginationOptionsFromQueryParameters';
-import { validateCoordinate, validateSchema } from '@shared/utils/ValidateSchema';
-import { validateEntityExistence } from '@shared/utils/EntitiyNotFound';
+import { validateCoordinate, validateSchema } from '@shared/utils/rest/ValidateSchema';
+import { validateEntityExistence } from '@shared/utils/rest/EntitiyValidation';
 import { handleRestExceptions } from '@shared/HandleRestExceptions';
 import { Host } from '@shared/entities/Host';
 
@@ -47,7 +47,6 @@ class RoomController {
             const rooms = await this.roomService.getRooms(paginationOptions, req.query);
             return res.status(200).send(rooms);
         } catch (error) {
-            console.log(error);
             handleRestExceptions(error, res);
         }
     };
@@ -94,6 +93,7 @@ class RoomController {
         description: Joi.string().min(1).max(600),
         hourlyRate: Joi.number(),
     }).min(1);
+
     public updateRoom = async (req: Request, res: Response) => {
         try {
             validateSchema(this.updateRoomSchema, req.body);

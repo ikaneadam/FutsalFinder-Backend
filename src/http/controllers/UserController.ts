@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import * as Joi from 'joi';
 import { handleRestExceptions } from '@shared/HandleRestExceptions';
 import UserService from '@services/UserService';
-import { validateSchema } from '@shared/utils/ValidateSchema';
+import { validateSchema } from '@shared/utils/rest/ValidateSchema';
 
 class UserController {
     private readonly userService: UserService;

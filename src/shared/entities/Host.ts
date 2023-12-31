@@ -33,7 +33,7 @@ export class Host extends ExtendedBaseEntity {
     @OneToMany(() => Room, (room) => room.host)
     rooms: Room[];
 
-    @ManyToMany(() => Image)
+    @ManyToMany(() => Image, { cascade: true })
     @JoinTable()
     images: Image[];
 

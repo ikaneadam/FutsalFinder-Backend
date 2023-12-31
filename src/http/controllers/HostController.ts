@@ -1,14 +1,19 @@
 import { Request, Response } from 'express';
 import * as Joi from 'joi';
 import { handleRestExceptions } from '@shared/HandleRestExceptions';
-import { validateSchema } from '@shared/utils/ValidateSchema';
+import { validateSchema } from '@shared/utils/rest/ValidateSchema';
 import HostDAO from '@shared/dao/HostDAO';
 import { TAuthorizedUser } from '@shared/middleware/Auth';
 import { PaginationOptions } from '@shared/pagination/pagination.options';
 import BuildPaginationOptionsFromQueryParameters from '@shared/pagination/BuildPaginationOptionsFromQueryParameters';
 import { FindOptionsWhere } from 'typeorm';
-import { validateEntityExistence } from '@shared/utils/EntitiyNotFound';
+import {
+    validateEntityExistence,
+    validateValueExistence,
+} from '@shared/utils/rest/EntitiyValidation';
 import { getHostIdFromParams } from '@shared/middleware/ExtractHost';
+import multer, { Multer } from 'multer';
+import { multerImage } from '@shared/types/common';
 
 class HostController {
     private readonly hostDAO: HostDAO;
@@ -64,6 +69,19 @@ class HostController {
             const createdHost = await this.hostDAO.createHost(req.body);
 
             return res.status(200).json(createdHost);
+        } catch (e: any) {
+            handleRestExceptions(e, res);
+        }
+    };
+
+    public setHostImages = async (req: Request, res: Response) => {
+        try {
+            const hostId = getHostIdFromParams(req);
+            const images = req.files as multerImage[];
+            validateValueExistence(images);
+            const updatedHost = await this.hostDAO.setHostImages(hostId, images);
+
+            return res.status(200).json(updatedHost);
         } catch (e: any) {
             handleRestExceptions(e, res);
         }

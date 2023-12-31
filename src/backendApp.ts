@@ -36,7 +36,7 @@ class BackendApp {
     }
 
     private staticFiles() {
-        this.app.use('/static', express.static(path.join(__dirname, '../fileStorage')));
+        this.app.use('/api/v1/static', express.static(path.join(__dirname, '../fileStorage')));
     }
 
     public listen() {

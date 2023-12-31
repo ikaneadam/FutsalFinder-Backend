@@ -9,6 +9,8 @@ import errorMessages from '@shared/errorMessages';
 import { updateEntity } from '@shared/utils/UpdateEntity';
 import { Pagination } from '@shared/pagination/pagination';
 import { PaginationOptions } from '@shared/pagination/pagination.options';
+import { Image } from '@shared/entities/Image';
+import { multerImage } from '@shared/types/common';
 
 class HostDAO {
     private hostRepository: Repository<Host>;
@@ -63,6 +65,22 @@ class HostDAO {
             skip: options.page * options.limit,
         });
         return new Pagination<Host>({ data, total }, options);
+    }
+
+    //freaking multer
+    public async setHostImages(hostUUID: string, imagesToSet: multerImage[]) {
+        const hostToUpdate = await this.getHostByUUID(hostUUID);
+        if (hostToUpdate === null) {
+            throw new EntityNotFound();
+        }
+
+        const hanna = imagesToSet.map((imageToSet: multerImage) => {
+            const newImage = new Image();
+            newImage.fileName = imageToSet.filename;
+            return newImage;
+        });
+        hostToUpdate.images = hanna;
+        return await this.hostRepository.save(hostToUpdate);
     }
 
     public async createHost(createHostInput: CreateHostInput): Promise<Host> {

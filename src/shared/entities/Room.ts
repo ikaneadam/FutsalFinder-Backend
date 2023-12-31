@@ -11,8 +11,8 @@ import {
 } from 'typeorm';
 import { ExtendedBaseEntity } from '@shared/interfaces/ExtendedBaseEntity';
 import { BookingReservation } from './BookingReservation';
-import { StandardReservationDate } from '@shared/entities/StandardReservationDate';
-import { AdjustedReservationDate } from '@shared/entities/AdjustedReservationDate';
+import { StandardAvailableDate } from '@shared/entities/StandardAvailableDate';
+import { AdjustedAvailableDate } from '@shared/entities/AdjustedAvailableDate';
 import { Host } from '@shared/entities/Host';
 import { Address } from '@shared/entities/Address';
 import { Image } from '@shared/entities/Image';
@@ -35,21 +35,25 @@ export class Room extends ExtendedBaseEntity {
     @JoinColumn()
     address: Address;
 
-    @ManyToMany(() => Image)
+    @ManyToMany(() => Image, { cascade: true })
     @JoinTable()
     images: Image[];
 
     @ManyToOne(() => Host, (host) => host.rooms)
+    @JoinColumn({ name: 'hostUuid' })
     host: Host;
+
+    @Column({ type: 'uuid', nullable: true })
+    hostUuid: string | null;
 
     @OneToMany(() => BookingReservation, (bookingReservation) => bookingReservation.room)
     bookingReservations: BookingReservation[];
 
-    @OneToMany(() => StandardReservationDate, (standardDate) => standardDate.room)
-    standardDates: StandardReservationDate[];
+    @OneToMany(() => StandardAvailableDate, (standardDate) => standardDate.room)
+    standardDates: StandardAvailableDate[];
 
-    @OneToMany(() => AdjustedReservationDate, (adjustedDate) => adjustedDate.room)
-    adjustedDates: AdjustedReservationDate[];
+    @OneToMany(() => AdjustedAvailableDate, (adjustedDate) => adjustedDate.room)
+    adjustedDates: AdjustedAvailableDate[];
 
     //TYPEORM HACK TO INCLUDE IN GET MANY INSTEAD OF RAW
     // cheated with this one: https://github.com/typeorm/typeorm/issues/1822
@@ -58,4 +62,8 @@ export class Room extends ExtendedBaseEntity {
         select: false,
     })
     distance: number;
+
+    doesRoomBelongToUser(userHostId: string) {
+        return this.hostUuid === userHostId;
+    }
 }

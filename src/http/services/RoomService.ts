@@ -5,7 +5,12 @@ import { ExistenceResult } from '@shared/interfaces/EntitiyExist';
 import { Pagination } from '@shared/pagination/pagination';
 import { Room } from '@shared/entities/Room';
 import * as Joi from 'joi';
-import { validateCoordinate } from '@shared/utils/ValidateSchema';
+import { validateCoordinate } from '@shared/utils/rest/ValidateSchema';
+import { TAuthorizedUser } from '@shared/middleware/Auth';
+import { isAdminUser } from '@shared/types/Roles';
+import entityNotFound from '@shared/exceptions/EntityNotFound';
+import forbidden from '@shared/exceptions/Forbidden';
+import errorMessages from '@shared/errorMessages';
 
 class RoomService {
     private readonly roomDAO: RoomDAO;
@@ -55,6 +60,37 @@ class RoomService {
         }
 
         return [true, locationFilter];
+    }
+
+    public isRoomOfUser(user: TAuthorizedUser, room: Room | undefined | null) {
+        if (room === undefined || room === null) {
+            throw new entityNotFound(errorMessages.rooms.notFound);
+        }
+
+        if (isAdminUser(user.roles)) {
+            return true;
+        }
+
+        return room.doesRoomBelongToUser(user.hostId!);
+    }
+
+    public async isRoomOfUserByRoomUUID(
+        user: TAuthorizedUser,
+        roomId: string
+    ): Promise<{ isRoomOfUser: boolean; room: Room }> {
+        const room: Room | null = await this.roomDAO.getRoomByUUID(roomId);
+
+        const doesRoomBelongToUser = this.isRoomOfUser(user, room);
+
+        return { isRoomOfUser: doesRoomBelongToUser, room: room! };
+    }
+
+    public async handleRoomAuthorization(user: TAuthorizedUser, roomId: string): Promise<Room> {
+        const { isRoomOfUser, room } = await this.isRoomOfUserByRoomUUID(user, roomId);
+        if (!isRoomOfUser) {
+            throw new forbidden();
+        }
+        return room;
     }
 }
 

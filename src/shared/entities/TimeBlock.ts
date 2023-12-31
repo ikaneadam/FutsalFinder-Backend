@@ -1,7 +1,7 @@
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { ExtendedBaseEntity } from '@shared/interfaces/ExtendedBaseEntity';
-import { AdjustedReservationDate } from './AdjustedReservationDate';
-import { StandardReservationDate } from './StandardReservationDate';
+import { AdjustedAvailableDate } from '@shared/entities/AdjustedAvailableDate';
+import { StandardAvailableDate } from '@shared/entities/StandardAvailableDate';
 
 @Entity()
 export class TimeBlock extends ExtendedBaseEntity {
@@ -14,9 +14,9 @@ export class TimeBlock extends ExtendedBaseEntity {
     @Column('time')
     endTime: string;
 
-    @ManyToOne(() => AdjustedReservationDate, (adjustedDate) => adjustedDate.availabilityPeriods)
-    adjustedDate: AdjustedReservationDate;
+    @ManyToOne(() => AdjustedAvailableDate, (adjustedDate) => adjustedDate.availabilityPeriods)
+    adjustedDate: AdjustedAvailableDate;
 
-    @ManyToOne(() => StandardReservationDate, (standardDate) => standardDate.availabilityPeriods)
-    standardDate: StandardReservationDate;
+    @ManyToOne(() => StandardAvailableDate, (standardDate) => standardDate.availabilityPeriods)
+    standardDate: StandardAvailableDate;
 }

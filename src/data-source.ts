@@ -2,8 +2,8 @@ import { DataSource } from 'typeorm';
 import dotenv from 'dotenv';
 
 import { TimeBlock } from '@shared/entities/TimeBlock';
-import { StandardReservationDate } from '@shared/entities/StandardReservationDate';
-import { AdjustedReservationDate } from '@shared/entities/AdjustedReservationDate';
+import { StandardAvailableDate } from '@shared/entities/StandardAvailableDate';
+import { AdjustedAvailableDate } from '@shared/entities/AdjustedAvailableDate';
 import { Host } from '@shared/entities/Host';
 import { Role } from '@shared/entities/Role';
 import { User } from '@shared/entities/User';
@@ -28,8 +28,8 @@ export const AppDataSource = new DataSource({
         Role,
         User,
         TimeBlock,
-        StandardReservationDate,
-        AdjustedReservationDate,
+        StandardAvailableDate,
+        AdjustedAvailableDate,
         Room,
         Host,
         BookingReservation,

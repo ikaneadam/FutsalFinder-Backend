@@ -12,6 +12,7 @@ import { Address } from '@shared/entities/Address';
 import HostDAO from '@shared/dao/HostDAO';
 import entityNotFound from '@shared/exceptions/EntityNotFound';
 import errorMessages from '@shared/errorMessages';
+import { Multer } from 'multer';
 
 class RoomDAO {
     private roomRepository: Repository<Room>;
@@ -58,7 +59,6 @@ class RoomDAO {
             where: filter,
             relations: {
                 address: true,
-                host: true,
                 images: true,
             },
             take: options.limit,
@@ -73,7 +73,6 @@ class RoomDAO {
         userLongitude: number,
         radius: number
     ): Promise<Pagination<Room>> {
-        radius = radius;
         const calculateEarthDistance = `
                             earth_distance(
                                 ll_to_earth(:userLatitude::double precision, :userLongitude::double precision),
@@ -85,7 +84,6 @@ class RoomDAO {
             .createQueryBuilder('room')
             .innerJoinAndSelect('room.address', 'address')
             .leftJoinAndSelect('room.images', 'images')
-            .leftJoinAndSelect('room.host', 'host')
             .addSelect(calculateEarthDistance, 'room_distance')
             .where(`${calculateEarthDistance} < :radius`, { radius })
             .orderBy('room_distance', 'ASC')
@@ -100,7 +98,7 @@ class RoomDAO {
     }
 
     public async createRoom(createRoomInput: CreateRoomInput, hostId: string): Promise<Room> {
-        //todo use updaten entitiy here
+        //todo use updateEntitiy<Room>() here
         const addressRoomInput = createRoomInput.address;
         const addressToCreate = new Address();
         addressToCreate.city = addressRoomInput.city;

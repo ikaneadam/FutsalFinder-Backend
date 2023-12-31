@@ -14,6 +14,11 @@ export function updateEntity<T>(
 ): void {
     for (const key in updateSchema) {
         const updateValue = updateSchema[key];
+        if (Array.isArray(entityToUpdate[key])) {
+            entityToUpdate[key] = updateValue;
+            continue;
+        }
+
         if (
             typeof updateValue === 'object' &&
             updateValue !== null &&

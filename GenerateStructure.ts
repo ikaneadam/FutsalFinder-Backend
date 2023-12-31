@@ -23,8 +23,9 @@ function generateFile(directory: string, fileName: string, content: string) {
 
 //used for camelcase etc.
 function capitalizeName(name: string): [string, string] {
-    const capitalized = name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
-    return [capitalized, name.toLowerCase()];
+    const capitalized = name.charAt(0).toUpperCase() + name.slice(1);
+    const nonCapitalized = name.charAt(0).toLowerCase() + name.slice(1);
+    return [capitalized, nonCapitalized];
 }
 
 function generateController([capitalizedName, nonCapitalizedName]: [string, string]) {
@@ -34,9 +35,9 @@ import ${capitalizedName}Service from '@services/${capitalizedName}Service';
 import ${capitalizedName}DAO from '@shared/dao/${capitalizedName}DAO';
 import { PaginationOptions } from '@shared/pagination/pagination.options';
 import BuildPaginationOptionsFromQueryParameters from '@shared/pagination/BuildPaginationOptionsFromQueryParameters';
-import { validateSchema } from '@shared/utils/ValidateSchema';
-import { validateEntityExistence } from '@shared/utils/EntitiyNotFound';
-import { handleRestExceptions } from '@shared/utils/HandleRestExceptions';
+import { validateEntityExistence } from '@shared/utils/rest/EntitiyValidation';
+import { validateSchema } from '@shared/utils/rest/ValidateSchema';
+import { handleRestExceptions } from '@shared/HandleRestExceptions';
 
 class ${capitalizedName}Controller {
     private readonly ${nonCapitalizedName}Service: ${capitalizedName}Service;
