@@ -42,6 +42,7 @@ class UserController {
 
             return res.status(200).json({ token: userToken });
         } catch (e: any) {
+            console.log(e);
             handleRestExceptions(e, res);
         }
     };

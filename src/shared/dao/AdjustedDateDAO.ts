@@ -10,7 +10,7 @@ import { AdjustedAvailableDate } from '@shared/entities/AdjustedAvailableDate';
 import {
     CreateAdjustedDateInput,
     UpdateAdjustedDateInput,
-} from '@shared/types/AdjustedDate/AdjustedDateInput';
+} from '@shared/types/Dates/AdjustedDate/AdjustedDateInput';
 
 class AdjustedDateDAO {
     private adjustedDateRepository: Repository<AdjustedAvailableDate>;

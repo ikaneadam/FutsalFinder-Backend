@@ -23,6 +23,10 @@ const errorMessages = {
         dateIsNotPossible: 'Given Date does not exist',
         dateMustBeFuture: 'Date must be in the future',
     },
+    bookings: {
+        notAvailable: 'given times are not available',
+        bookingConflict: 'given times overlaps with an existing reservation',
+    },
 };
 
 // A LOT OF DUPLICATES STEP UP YOUR GAME SON

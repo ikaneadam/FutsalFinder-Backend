@@ -3,7 +3,7 @@ import HttpView from '@shared/interfaces/HttpView';
 import { auth } from '@shared/middleware/Auth';
 import HostController from '@controllers/HostController';
 import { Roles } from '@shared/types/Roles';
-import fileUpload from '@shared/middleware/fileUpload';
+import fileUpload from '@shared/middleware/FileUpload';
 
 class HostView extends HttpView {
     public path = '/hosts/:hostId?';

@@ -30,7 +30,11 @@ export class BookingReservation extends ExtendedBaseEntity {
     uuid: string;
 
     @ManyToOne(() => User, (user) => user.bookingReservations)
+    @JoinColumn({ name: 'userUuid' })
     user: User;
+
+    @Column({ type: 'uuid', nullable: false })
+    userUuid: string;
 
     @ManyToOne(() => Room, (room) => room.bookingReservations)
     @JoinColumn({ name: 'roomUuid' })
