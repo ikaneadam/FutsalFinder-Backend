@@ -15,12 +15,15 @@ import {
     AvailableReservationTime,
     AvailableReservationTimes,
 } from '@shared/types/Dates/AvailableReservationTimes';
-import { isTimeRangeAvailable } from '@shared/utils/isTimeRangeAvailable';
+import { isTimeRangeAvailable, timeToSeconds } from '@shared/utils/isTimeRangeAvailable';
 import { TimeBlock } from '@shared/entities/TimeBlock';
 import Conflict from '@shared/exceptions/Conflict';
+import RoomDAO from '@shared/dao/RoomDAO';
+import { calculateReservationPrice } from '@shared/utils/calculateReservationPrice';
 
 class BookingReservationDAO {
     private bookingReservationRepository: Repository<BookingReservation>;
+    private roomDAO: RoomDAO;
     private roomRepository: Repository<Room>;
     private standardDateRepository: Repository<StandardAvailableDate>;
     private adjustedDateRepository: Repository<AdjustedAvailableDate>;
@@ -30,6 +33,7 @@ class BookingReservationDAO {
         this.standardDateRepository = AppDataSource.getRepository(StandardAvailableDate);
         this.adjustedDateRepository = AppDataSource.getRepository(AdjustedAvailableDate);
         this.roomRepository = AppDataSource.getRepository(Room);
+        this.roomDAO = new RoomDAO();
     }
     //todo able to choose end date
     public async getThisWeeksAvailableReservationTimes(
@@ -159,6 +163,11 @@ class BookingReservationDAO {
         roomUUID: string,
         createBookingReservationInput: CreateBookingReservationInput
     ): Promise<BookingReservation> {
+        const room = await this.roomDAO.getRoomByUUID(roomUUID);
+        if (room === null) {
+            throw new EntityNotFound(errorMessages.rooms.notFound);
+        }
+
         //check if room does not exist
         const bookingDate = new Date(createBookingReservationInput.date); //date is validated in the controller layer
         const availableReservationTimes = await this.getAvailableReservationTimesByDay(
@@ -196,6 +205,12 @@ class BookingReservationDAO {
         bookingReservationToCreate.date = createBookingReservationInput.date as Date; //todo the last day of working in the backend and im doing stuff liek this becase i dont have time anymores
         bookingReservationToCreate.startTime = createBookingReservationInput.startTime;
         bookingReservationToCreate.endTime = createBookingReservationInput.endTime;
+        const reservationPrice = calculateReservationPrice(
+            createBookingReservationInput.startTime,
+            createBookingReservationInput.endTime,
+            room.hourlyRate
+        );
+        bookingReservationToCreate.cost = reservationPrice;
         return await this.bookingReservationRepository.save(bookingReservationToCreate);
     }
 

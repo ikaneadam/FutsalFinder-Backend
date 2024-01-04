@@ -37,7 +37,7 @@ export function isTimeRangeAvailable(
     return false;
 }
 
-function timeToSeconds(time: string): number {
+export function timeToSeconds(time: string): number {
     const [hh, mm, ss = 0] = time.split(':').map(Number);
     return hh * 3600 + mm * 60 + ss;
 }

@@ -61,30 +61,30 @@ export class BookingReservation extends ExtendedBaseEntity {
     @Column({ default: false })
     isCanceled: boolean;
 
-    @BeforeInsert()
-    @BeforeUpdate()
-    async validateTimeSlot() {
-        const repository = AppDataSource.getRepository(BookingReservation);
-
-        const existingReservations = await repository.find({
-            where: [
-                {
-                    room: { uuid: this.roomUuid },
-                    date: this.date,
-                    startTime: Raw((alias) => `${alias} < :endTime`, { endTime: this.endTime }),
-                    endTime: Raw((alias) => `${alias} > :startTime`, { startTime: this.startTime }),
-                    uuid: Raw((alias) => `${alias} <> :currentUUID`, { currentUUID: this.uuid }),
-                },
-                {
-                    room: { uuid: this.roomUuid },
-                    date: this.date,
-                    uuid: Raw((alias) => `${alias} <> :currentUUID`, { currentUUID: this.uuid }),
-                },
-            ],
-        });
-
-        if (existingReservations.length > 0) {
-            throw new Error('Overlapping time slots are not allowed');
-        }
-    }
+    // @BeforeInsert()
+    // @BeforeUpdate()
+    // async validateTimeSlot() {
+    //     const repository = AppDataSource.getRepository(BookingReservation);
+    //
+    //     const existingReservations = await repository.find({
+    //         where: [
+    //             {
+    //                 room: { uuid: this.roomUuid },
+    //                 date: this.date,
+    //                 startTime: Raw((alias) => `${alias} < :endTime`, { endTime: this.endTime }),
+    //                 endTime: Raw((alias) => `${alias} > :startTime`, { startTime: this.startTime }),
+    //                 uuid: Raw((alias) => `${alias} <> :currentUUID`, { currentUUID: this.uuid }),
+    //             },
+    //             {
+    //                 room: { uuid: this.roomUuid },
+    //                 date: this.date,
+    //                 uuid: Raw((alias) => `${alias} <> :currentUUID`, { currentUUID: this.uuid }),
+    //             },
+    //         ],
+    //     });
+    //
+    //     if (existingReservations.length > 0) {
+    //         throw new Error('Overlapping time slots are not allowed');
+    //     }
+    // }
 }

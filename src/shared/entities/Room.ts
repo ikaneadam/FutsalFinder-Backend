@@ -29,7 +29,7 @@ export class Room extends ExtendedBaseEntity {
     description: string | undefined | null;
 
     @Column({ type: 'float' })
-    hourlyRate: number | undefined | null;
+    hourlyRate: number;
 
     @OneToOne(() => Address, { cascade: true })
     @JoinColumn()
