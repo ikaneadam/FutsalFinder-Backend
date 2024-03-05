@@ -5,9 +5,14 @@ import RoomDAO from '@shared/dao/RoomDAO';
 import { PaginationOptions } from '@shared/pagination/pagination.options';
 import BuildPaginationOptionsFromQueryParameters from '@shared/pagination/BuildPaginationOptionsFromQueryParameters';
 import { validateCoordinate, validateSchema } from '@shared/utils/rest/ValidateSchema';
-import { validateEntityExistence } from '@shared/utils/rest/EntitiyValidation';
+import {
+    validateEntityExistence,
+    validateValueExistence,
+} from '@shared/utils/rest/EntitiyValidation';
 import { handleRestExceptions } from '@shared/HandleRestExceptions';
 import { Host } from '@shared/entities/Host';
+import { getHostIdFromParams } from '@shared/middleware/ExtractHost';
+import { multerImage } from '@shared/types/common';
 
 class RoomController {
     private readonly roomService: RoomService;
@@ -60,9 +65,9 @@ class RoomController {
             city: Joi.string().min(2).max(255).required(),
             latitude: Joi.number().custom(validateCoordinate, 'number.precision').required(),
             longitude: Joi.number().custom(validateCoordinate, 'number.precision').required(),
-        }),
+        }).required(),
         name: Joi.string().min(3).max(255).required(),
-        description: Joi.string().min(1).max(600),
+        description: Joi.string().min(1).max(600).required(),
         hourlyRate: Joi.number().required(),
     });
 
@@ -94,6 +99,19 @@ class RoomController {
         hourlyRate: Joi.number(),
     }).min(1);
 
+    public setRoomImages = async (req: Request, res: Response) => {
+        try {
+            const images = req.files as multerImage[];
+            validateValueExistence(images);
+            const roomId = req.params.roomId;
+            const updatedHost = await this.roomDAO.setRoomImages(roomId, images);
+
+            return res.status(200).json(updatedHost);
+        } catch (e: any) {
+            handleRestExceptions(e, res);
+        }
+    };
+
     public updateRoom = async (req: Request, res: Response) => {
         try {
             validateSchema(this.updateRoomSchema, req.body);
@@ -102,7 +120,6 @@ class RoomController {
 
             return res.status(200).json(updatedRoom);
         } catch (e: any) {
-            console.log(e);
             handleRestExceptions(e, res);
         }
     };

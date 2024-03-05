@@ -90,7 +90,6 @@ class StandardDateController {
 
     public createStandardDate = async (req: Request, res: Response) => {
         try {
-            console.log(Object.values(DayOfWeek));
             validateSchema(this.createStandardDateSchema, req.body);
             const user: TAuthorizedUser = req.user!;
             const roomId = req.params.roomId;
@@ -102,7 +101,6 @@ class StandardDateController {
 
             return res.status(200).json(createdStandardDate);
         } catch (e: any) {
-            console.log(e);
             handleRestExceptions(e, res);
         }
     };

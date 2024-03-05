@@ -4,7 +4,12 @@ import AdjustedDateService from '@services/AdjustedDateService';
 import AdjustedDateDAO from '@shared/dao/AdjustedDateDAO';
 import { PaginationOptions } from '@shared/pagination/pagination.options';
 import BuildPaginationOptionsFromQueryParameters from '@shared/pagination/BuildPaginationOptionsFromQueryParameters';
-import { isDateFuture, timeRegex, validateSchema } from '@shared/utils/rest/ValidateSchema';
+import {
+    dateRegex,
+    timeRegex,
+    validateSchema,
+    validateTimeSlot,
+} from '@shared/utils/rest/ValidateSchema';
 import { validateEntityExistence } from '@shared/utils/rest/EntitiyValidation';
 import { handleRestExceptions } from '@shared/HandleRestExceptions';
 import { TAuthorizedUser } from '@shared/middleware/Auth';
@@ -70,23 +75,23 @@ class AdjustedDateController {
 
     private createAdjustedDateSchema = Joi.object({
         date: Joi.string()
-            .custom(isDateFuture)
-            .messages({
-                'date.invalid': errorMessages.dates.invalidDateFormat,
-                'date.noDate': errorMessages.dates.dateIsNotPossible,
-                'date.mustBeFuture': errorMessages.dates.dateMustBeFuture,
-            })
+            .regex(dateRegex)
+            .message(errorMessages.dates.invalidDateFormat)
             .required(),
         availabilityPeriods: Joi.array()
             .items(
                 Joi.object({
                     startTime: Joi.string()
                         .regex(timeRegex)
-                        .message(ErrorMessages.dates.invalidTimeFormat)
+                        .message(errorMessages.dates.invalidTimeFormat)
+                        // Use .custom() method for custom validation logic
+                        .custom(validateTimeSlot, 'custom validation for start time')
                         .required(),
                     endTime: Joi.string()
                         .regex(timeRegex)
-                        .message(ErrorMessages.dates.invalidTimeFormat)
+                        .message(errorMessages.dates.invalidTimeFormat)
+                        // Use .custom() method for custom validation logic
+                        .custom(validateTimeSlot, 'custom validation for end time')
                         .required(),
                 })
             )
@@ -96,40 +101,43 @@ class AdjustedDateController {
     public createAdjustedDate = async (req: Request, res: Response) => {
         try {
             validateSchema(this.createAdjustedDateSchema, req.body);
-            const user: TAuthorizedUser = req.user!;
-            const roomId = req.params.roomId;
-            const room = await this.roomService.handleRoomAuthorization(user, roomId);
-            const createdAdjustedDate = await this.adjustedDateDAO.createAdjustedDate(
-                room,
-                req.body
-            );
+            // const user: TAuthorizedUser = req.user!;
+            // const roomId = req.params.roomId;
+            // const room = await this.roomService.handleRoomAuthorization(user, roomId);
+            // const createdAdjustedDate = await this.adjustedDateDAO.createAdjustedDate(
+            //     room,
+            //     req.body
+            // );
 
-            return res.status(200).json(createdAdjustedDate);
+            return res.status(200).json(req.body);
         } catch (e: any) {
-            console.log(e);
             handleRestExceptions(e, res);
         }
     };
 
     private updateAdjustedDateSchema = Joi.object({
-        date: Joi.string().custom(isDateFuture).messages({
-            'date.invalid': errorMessages.dates.invalidDateFormat,
-            'date.noDate': errorMessages.dates.dateIsNotPossible,
-            'date.mustBeFuture': errorMessages.dates.dateMustBeFuture,
-        }),
+        date: Joi.string()
+            .regex(dateRegex)
+            .message(errorMessages.dates.invalidDateFormat)
+            .required(),
         availabilityPeriods: Joi.array()
             .items(
                 Joi.object({
                     startTime: Joi.string()
                         .regex(timeRegex)
-                        .message(ErrorMessages.dates.invalidTimeFormat)
+                        .message(errorMessages.dates.invalidTimeFormat)
+                        // Use .custom() method for custom validation logic
+                        .custom(validateTimeSlot, 'custom validation for start time')
                         .required(),
                     endTime: Joi.string()
                         .regex(timeRegex)
-                        .message(ErrorMessages.dates.invalidTimeFormat)
+                        .message(errorMessages.dates.invalidTimeFormat)
+                        // Use .custom() method for custom validation logic
+                        .custom(validateTimeSlot, 'custom validation for end time')
                         .required(),
                 })
             )
+            .required()
             .min(1),
     });
 

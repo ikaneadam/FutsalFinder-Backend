@@ -12,7 +12,9 @@ class AddressView extends HttpView {
 
     public routes() {
         //todo maybe weird that its a post.
+        // and the urls are not restful.
         this.router.post('/address/get-address', this.controller.getAddress);
+        this.router.post('/address/get-address-query', this.controller.getAddressQuery);
     }
 }
 

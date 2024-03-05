@@ -11,6 +11,7 @@ import RoomView from '@views/RoomView';
 import StandardDateView from '@views/StandardDateView';
 import AdjustedDateView from '@views/AdjustedDateView';
 import BookingReservationView from '@views/BookingReservationView';
+import AutoCompletionView from '@views/AutoCompletionView';
 
 dotenv.config();
 
@@ -25,6 +26,7 @@ const server = new BackendApp({
         new StandardDateView(),
         new AdjustedDateView(),
         new BookingReservationView(),
+        new AutoCompletionView(),
     ],
 });
 

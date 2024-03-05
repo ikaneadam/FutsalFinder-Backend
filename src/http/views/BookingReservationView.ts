@@ -20,10 +20,10 @@ class BookingReservationView extends HttpView {
             this.controller.getAvailableBookingReservationTimes
         );
         this.router.use(this.path, auth([Roles.user]));
+        this.router.get(this.path, this.controller.getBookingReservation);
         this.router.post(this.path, this.controller.createBookingReservation);
-        this.router.delete(this.path, this.controller.deleteBookingReservation);
-        this.router.use(this.path, auth([Roles.user, Roles.admin, Roles.host]));
-        this.router.get(this.path, this.controller.getAvailableBookingReservationTimes);
+        // this.router.use(this.path, auth([Roles.user, Roles.admin, Roles.host]));
+        // this.router.get(this.path, this.controller.getAvailableBookingReservationTimes);
     }
 }
 

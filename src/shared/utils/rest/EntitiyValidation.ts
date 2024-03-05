@@ -1,5 +1,4 @@
 import entityNotFound from '@shared/exceptions/EntityNotFound';
-import errorMessages from '@shared/errorMessages';
 import badRequest from '@shared/exceptions/BadRequest';
 
 export function validateEntityExistence<t>(entity: t | null): entity is t {

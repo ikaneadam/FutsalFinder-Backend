@@ -4,6 +4,7 @@ export class ExtendedBaseEntity extends BaseEntity {
     @CreateDateColumn({
         type: 'timestamptz',
         default: () => 'CURRENT_TIMESTAMP',
+        select: false,
     })
     createdAt!: Date;
 
@@ -11,6 +12,7 @@ export class ExtendedBaseEntity extends BaseEntity {
         type: 'timestamptz',
         default: () => 'CURRENT_TIMESTAMP',
         onUpdate: 'CURRENT_TIMESTAMP',
+        select: false,
     })
     updatedAt!: Date;
 
@@ -18,6 +20,7 @@ export class ExtendedBaseEntity extends BaseEntity {
         type: 'timestamptz',
         nullable: true,
         default: null,
+        select: false,
     })
     deletedAt!: Date;
 }

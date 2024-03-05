@@ -1,4 +1,4 @@
-import { Equal, FindOptionsWhere, getManager, Repository, UpdateResult } from 'typeorm';
+import { Equal, FindOptionsWhere, getManager, OneToMany, Repository, UpdateResult } from 'typeorm';
 import { AppDataSource } from '@/data-source';
 import { ExistenceResult, parseEntityToExistenceResult } from '@shared/interfaces/EntitiyExist';
 import { Room } from '@shared/entities/Room';
@@ -13,6 +13,11 @@ import HostDAO from '@shared/dao/HostDAO';
 import entityNotFound from '@shared/exceptions/EntityNotFound';
 import errorMessages from '@shared/errorMessages';
 import { Multer } from 'multer';
+import { multerImage } from '@shared/types/common';
+import { Image } from '@shared/entities/Image';
+import { BookingReservation } from '@shared/entities/BookingReservation';
+import { StandardAvailableDate } from '@shared/entities/StandardAvailableDate';
+import { AdjustedAvailableDate } from '@shared/entities/AdjustedAvailableDate';
 
 class RoomDAO {
     private roomRepository: Repository<Room>;
@@ -44,6 +49,8 @@ class RoomDAO {
         return await this.roomRepository.findOne({
             relations: {
                 address: true,
+                images: true,
+                host: true,
             },
             where: {
                 uuid: Equal(roomUUID),
@@ -67,25 +74,43 @@ class RoomDAO {
         return new Pagination<Room>({ data, total }, options);
     }
 
+    //freaking multer
+    public async setRoomImages(roomUUID: string, imagesToSet: multerImage[]) {
+        const roomToUpdate = await this.getRoomByUUID(roomUUID);
+        if (roomToUpdate === null) {
+            throw new EntityNotFound();
+        }
+
+        const hanna = imagesToSet.map((imageToSet: multerImage) => {
+            const newImage = new Image();
+            newImage.fileName = imageToSet.filename;
+            return newImage;
+        });
+        roomToUpdate.images = hanna;
+        return await this.roomRepository.save(roomToUpdate);
+    }
+
     public async getRoomsFindClosestBasedOnCoords(
         options: PaginationOptions,
         userLatitude: number,
         userLongitude: number,
-        radius: number
+        radius: number | undefined
     ): Promise<Pagination<Room>> {
-        const calculateEarthDistance = `
+        const calculateEarthDistanceInMeters = `
                             earth_distance(
                                 ll_to_earth(:userLatitude::double precision, :userLongitude::double precision),
                                 ll_to_earth(address.latitude::double precision, address.longitude::double precision)
-                            )   1000
+                            ) 
                             `;
 
         const [data, total] = await this.roomRepository
             .createQueryBuilder('room')
             .innerJoinAndSelect('room.address', 'address')
             .leftJoinAndSelect('room.images', 'images')
-            .addSelect(calculateEarthDistance, 'room_distance')
-            .where(`${calculateEarthDistance} < :radius`, { radius })
+            .addSelect(calculateEarthDistanceInMeters, 'room_distance')
+            .where(radius !== undefined ? `${calculateEarthDistanceInMeters} < :radius` : '1=1', {
+                radius,
+            })
             .orderBy('room_distance', 'ASC')
             .setParameter('userLatitude', userLatitude)
             .setParameter('userLongitude', userLongitude)

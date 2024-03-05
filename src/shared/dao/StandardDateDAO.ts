@@ -54,8 +54,6 @@ class StandardDateDAO {
         roomId: string,
         standardDateUUID: string
     ): Promise<StandardAvailableDate | null> {
-        console.log(roomId);
-        console.log(standardDateUUID);
         return await this.standardDateRepository.findOne({
             where: {
                 uuid: Equal(standardDateUUID),

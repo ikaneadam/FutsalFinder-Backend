@@ -6,10 +6,14 @@ import { PaginationOptions } from '@shared/pagination/pagination.options';
 import BuildPaginationOptionsFromQueryParameters from '@shared/pagination/BuildPaginationOptionsFromQueryParameters';
 import { handleRestExceptions } from '@shared/HandleRestExceptions';
 import { validateEntityExistence } from '@shared/utils/rest/EntitiyValidation';
-import { isDateFuture, timeRegex, validateSchema } from '@shared/utils/rest/ValidateSchema';
-import { DayOfWeek } from '@shared/entities/StandardAvailableDate';
+import {
+    dateRegex,
+    timeRegex,
+    validateSchema,
+    validateTimeSlot,
+} from '@shared/utils/rest/ValidateSchema';
 import errorMessages from '@shared/errorMessages';
-import ErrorMessages from '@shared/errorMessages';
+import { TAuthorizedUser } from '@shared/middleware/Auth';
 
 class BookingReservationController {
     private readonly bookingReservationService: BookingReservationService;
@@ -34,65 +38,37 @@ class BookingReservationController {
     };
 
     public getBookingReservation = async (req: Request, res: Response) => {
-        const bookingReservationId = req.params.bookingReservationId;
-        if (bookingReservationId === undefined) {
-            await this.getBookingReservations(req, res);
-        } else {
-            await this.getSingleBookingReservation(bookingReservationId, req, res);
-        }
-    };
-
-    private getSingleBookingReservation = async (
-        bookingReservationId: string,
-        req: Request,
-        res: Response
-    ) => {
-        try {
-            const bookingReservation = await this.bookingReservationDAO.getBookingReservationByUUID(
-                bookingReservationId
-            );
-            validateEntityExistence(bookingReservation);
-            return res.status(200).send(bookingReservation);
-        } catch (error) {
-            handleRestExceptions(error, res);
-        }
-    };
-
-    private getBookingReservations = async (req: Request, res: Response) => {
         try {
             const paginationOptions: PaginationOptions =
                 await BuildPaginationOptionsFromQueryParameters.buildPaginationOptionsFromQueryParameters(
                     req
                 );
-
-            const bookingReservations = await this.bookingReservationDAO.getBookingReservations(
-                paginationOptions
+            const user: TAuthorizedUser = req.user!;
+            const reservations = await this.bookingReservationDAO.getBookingReservationByUserUUID(
+                paginationOptions,
+                user.id
             );
-            return res.status(200).send(bookingReservations);
+            return res.status(200).send(reservations);
         } catch (error) {
             handleRestExceptions(error, res);
         }
     };
 
     private createBookingReservationSchema: Joi.Schema = Joi.object({
-        date: Joi.string().custom(isDateFuture).messages({
-            'date.invalid': errorMessages.dates.invalidDateFormat,
-            'date.noDate': errorMessages.dates.dateIsNotPossible,
-            'date.mustBeFuture': errorMessages.dates.dateMustBeFuture,
-        }),
-        startTime: Joi.string()
-            .regex(timeRegex)
-            .message(ErrorMessages.dates.invalidTimeFormat)
+        date: Joi.string()
+            .regex(dateRegex)
+            .message(errorMessages.dates.invalidDateFormat)
             .required(),
-        endTime: Joi.string()
-            .regex(timeRegex)
-            .message(ErrorMessages.dates.invalidTimeFormat)
-            .required(),
+
+        startTime: Joi.string().regex(timeRegex).required(),
+        endTime: Joi.string().regex(timeRegex).required(),
     });
 
     public createBookingReservation = async (req: Request, res: Response) => {
         try {
             validateSchema(this.createBookingReservationSchema, req.body);
+            this.bookingReservationService.validateBookingReservation(req.body);
+
             const user = req.user!;
             const roomId = req.params.roomId;
             const createdBookingReservation =
@@ -103,17 +79,6 @@ class BookingReservationController {
                 );
 
             return res.status(200).json(createdBookingReservation);
-        } catch (e: any) {
-            console.log(e);
-            handleRestExceptions(e, res);
-        }
-    };
-
-    private updateBookingReservationSchema: Joi.Schema = Joi.object({}).min(1);
-
-    public deleteBookingReservation = async (req: Request, res: Response) => {
-        try {
-            return res.status(200).json('ogho');
         } catch (e: any) {
             handleRestExceptions(e, res);
         }

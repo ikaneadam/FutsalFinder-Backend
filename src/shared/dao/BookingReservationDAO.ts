@@ -1,4 +1,4 @@
-import { DeleteResult, Equal, FindOptionsWhere, Repository } from 'typeorm';
+import { Between, DeleteResult, Equal, FindOptionsWhere, Repository } from 'typeorm';
 import { AppDataSource } from '@/data-source';
 import { ExistenceResult, parseEntityToExistenceResult } from '@shared/interfaces/EntitiyExist';
 import { BookingReservation } from '@shared/entities/BookingReservation';
@@ -66,6 +66,7 @@ class BookingReservationDAO {
         if (roomWithAvailableTimes === null) {
             throw new EntityNotFound(errorMessages.rooms.notFound);
         }
+        const reservedTimes = await this.getThisWeekBookingReservations(roomUUID);
         const availableReservationTimes = {
             roomUUID: roomWithAvailableTimes.uuid!,
             roomName: roomWithAvailableTimes.name!,
@@ -73,6 +74,7 @@ class BookingReservationDAO {
                 ...roomWithAvailableTimes.standardDates,
                 ...roomWithAvailableTimes.adjustedDates,
             ],
+            reservedTimes,
         };
 
         return availableReservationTimes;
@@ -143,6 +145,38 @@ class BookingReservationDAO {
                 uuid: Equal(bookingReservationUUID),
             },
         });
+    }
+
+    public async getBookingReservationByUserUUID(
+        options: PaginationOptions,
+        userUUID: string
+    ): Promise<Pagination<BookingReservation>> {
+        const [data, total] = await this.bookingReservationRepository.findAndCount({
+            where: {
+                userUuid: Equal(userUUID),
+            },
+            relations: {
+                room: true,
+            },
+            take: options.limit,
+            skip: options.page * options.limit,
+        });
+        return new Pagination<BookingReservation>({ data, total }, options);
+    }
+
+    public async getThisWeekBookingReservations(roomUUID: string): Promise<BookingReservation[]> {
+        const today = new Date();
+        const weekFromToday = new Date();
+        weekFromToday.setDate(today.getDate() + 7);
+        // todo this is a fast one rafactor on new release
+        const bookingReservations = await this.bookingReservationRepository.find({
+            where: {
+                roomUuid: Equal(roomUUID),
+                date: Between(today, weekFromToday),
+            },
+            select: ['startTime', 'endTime', 'date', 'userUuid'],
+        });
+        return bookingReservations;
     }
 
     public async getBookingReservations(

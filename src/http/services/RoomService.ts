@@ -24,7 +24,6 @@ class RoomService {
         queryParams: ParsedQs
     ): Promise<Pagination<Room>> {
         const [isPresent, queries] = this.areLocationQueryParametersPresent(queryParams);
-
         if (isPresent) {
             return await this.roomDAO.getRoomsFindClosestBasedOnCoords(
                 paginationOptions,
@@ -40,18 +39,17 @@ class RoomService {
     private locationFilterSchema: Joi.Schema = Joi.object({
         longitude: Joi.number().custom(validateCoordinate, 'number.precision').required(),
         latitude: Joi.number().custom(validateCoordinate, 'number.precision').required(),
-        radius: Joi.number().min(0).required(),
-    });
+    }).unknown(true);
 
     private areLocationQueryParametersPresent(queries: ParsedQs): ExistenceResult<{
         longitude: number;
         latitude: number;
-        radius: number;
+        radius: number | undefined;
     }> {
         const locationFilter: any = {
             longitude: Number(queries['longitude']),
             latitude: Number(queries['latitude']),
-            radius: Number(queries['radius']),
+            ...(queries['radius'] !== undefined && { radius: Number(queries['radius']) }),
         };
 
         const { error } = this.locationFilterSchema.validate(locationFilter, { convert: false });

@@ -1,5 +1,6 @@
 import { AdjustedAvailableDate } from '@shared/entities/AdjustedAvailableDate';
 import { StandardAvailableDate } from '@shared/entities/StandardAvailableDate';
+import { BookingReservation } from '@shared/entities/BookingReservation';
 
 export type AvailableReservationTimes = {
     roomUUID: string;
@@ -11,4 +12,5 @@ export type AvailableReservationTime = {
     roomUUID: string;
     roomName: string;
     availableTime?: AdjustedAvailableDate | StandardAvailableDate | undefined;
+    reservedTimes?: BookingReservation[];
 };

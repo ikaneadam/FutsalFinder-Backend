@@ -8,6 +8,7 @@ import { HttpMethod, HttpResponseErrorType, isHttpResponseSuccessful } from '@sh
 import dotenv from 'dotenv';
 import InternalServerError from '@shared/exceptions/InternalServerError';
 import errorMessages from '@shared/errorMessages';
+import { AutocompleteResponse } from '@shared/types/geoLocation/AddressPrediction';
 
 dotenv.config();
 class GeoService {
@@ -15,17 +16,16 @@ class GeoService {
     private readonly geoCodingServiceURL = `${process.env.GOOGLE_GEO_API_URL}`;
     private readonly geoCodingApiKey = `${process.env.GOOLE_GEO_API_KEY}`;
     private readonly geoForwardURL = `${this.geoCodingServiceURL}/maps/api/geocode/json`;
-
+    private readonly addressAutoCompleteUrl = `${this.geoCodingServiceURL}/maps/api/place/autocomplete/json`;
 
     constructor() {
         this.httpService = new HttpService();
     }
 
     public async getAddressFromGeoForward(
-        geoForwardInput: GeoForwardInput
+        geoAddressQuery: string
     ): Promise<GeoForwardSuccessResponse> {
-        //access key should be done else where but no time
-        const geoForwardRequestURL = this.createGeoForwardRequestURl(geoForwardInput)
+        const geoForwardRequestURL = this.createGeoForwardRequestURl(geoAddressQuery);
 
         const geoLocationResponse = await this.httpService.doRequest<
             GeoForwardSuccessResponse,
@@ -38,22 +38,32 @@ class GeoService {
         throw new InternalServerError(errorMessages.common.notAvailable);
     }
 
-    private createGeoForwardRequestURl(geoInput: GeoForwardInput): string {
-        const geoAddressQuery= this.parseGeoForwardInputToQueryParam(geoInput)
+    public async getAddressPredictions(geoAddressQuery: string): Promise<AutocompleteResponse> {
+        const geoForwardRequestURL = this.createPlaceAutoCompleteUrl(geoAddressQuery);
+        const predictionResponses = await this.httpService.doRequest<AutocompleteResponse, any>(
+            HttpMethod.GET,
+            geoForwardRequestURL
+        );
+        if (isHttpResponseSuccessful(predictionResponses)) {
+            return predictionResponses.response;
+        }
 
-        const componentFilterQueryString = `country:NL|postal_code=${geoInput.zip}`
-        //&components=${componentFilterQueryString}
-        const geoForwardRequestFullUrl = `${this.geoForwardURL}?address=${geoAddressQuery}&key=${this.geoCodingApiKey}`;
+        throw new InternalServerError(errorMessages.common.notAvailable);
+    }
 
+    private createPlaceAutoCompleteUrl(addressQuery: string) {
+        return `${this.addressAutoCompleteUrl}?input=${addressQuery}&language=NL&key=${this.geoCodingApiKey}`;
+    }
+
+    private createGeoForwardRequestURl(addressQuery: string): string {
+        const geoForwardRequestFullUrl = `${this.geoForwardURL}?address=${addressQuery}&key=${this.geoCodingApiKey}`;
         return geoForwardRequestFullUrl;
     }
 
-    private parseGeoForwardInputToQueryParam(geoInput: GeoForwardInput): string {
+    public parseGeoForwardInputToQueryParam(geoInput: GeoForwardInput): string {
         const { street, houseNumber, zip, state, city } = geoInput;
 
-        const queryString = encodeURIComponent(
-            `${street},${houseNumber},${zip},${state},${city}`
-        );
+        const queryString = encodeURIComponent(`${street},${houseNumber},${zip},${state},${city}`);
 
         return queryString;
     }
