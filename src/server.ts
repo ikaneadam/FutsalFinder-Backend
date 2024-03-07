@@ -16,7 +16,7 @@ import AutoCompletionView from '@views/AutoCompletionView';
 dotenv.config();
 
 const server = new BackendApp({
-    port: Number(process.env.PORT) || 65036,
+    port: process.env.PORT || 3000,
     middleWares: [cors(), express.json(), express.urlencoded({ extended: true })],
     views: [
         new UserView(),
