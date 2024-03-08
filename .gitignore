@@ -7,3 +7,4 @@ temp/
 package-lock/
 .env
 data/
+dist/

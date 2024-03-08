@@ -5,8 +5,10 @@
    "main": "src/server.ts",
    "scripts": {
       "test": "echo \"Error: no test specified\" && exit 1",
+      "build": "tsc --project tsconfig.json && tsc-alias -p tsconfig.json",
+      "start": "node ./dist/src/server.js",
       "start:cli": "nodemon -r tsconfig-paths/register src/server.ts",
-      "start": "ts-node -r tsconfig-paths/register src/server.ts",
+      "startDev": "ts-node -r tsconfig-paths/register src/server.ts",
       "seed:run": "ts-node -r tsconfig-paths/register seeders/Seed.ts"
    },
    "keywords": [],
