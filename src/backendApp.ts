@@ -15,7 +15,9 @@ class BackendApp {
         this.routes(appInit.views);
 
         AppDataSource.initialize()
-            .then(async () => {})
+            .then(async () => {
+                console.log('database connection made');
+            })
             .catch((error) => console.log(error));
     }
 
